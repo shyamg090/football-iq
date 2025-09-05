@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: temporal-postgres-quiz
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_DB: temporal
+    ports:
+      - "5433:5432"  # Changed port to avoid conflicts
+
+  temporal:
+    image: temporalio/auto-setup:1.23
+    container_name: temporal-quiz
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: temporal
+      POSTGRES_PWD: temporal
+      POSTGRES_SEEDS: postgres
+    depends_on:
+      - postgres
+    ports:
+      - "7234:7233" # Temporal Frontend API - changed port to avoid conflicts
+      - "8234:8233" # Temporal Web UI - changed port to avoid conflicts
+    
+  temporal-ui:
+    image: temporalio/ui:2.21.3
+    container_name: temporal-ui-quiz
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CORS_ORIGINS: http://localhost:8235
+    ports:
+      - "8235:8080"
+    depends_on:
+      - temporal
