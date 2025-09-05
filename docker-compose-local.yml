@@ -1,20 +1,27 @@
 version: "3.8"
 
 services:
+  postgres:
+    image: postgres:13
+    container_name: temporal-postgres-quiz
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_DB: temporal
+    ports:
+      - "5433:5432"  # Changed port to avoid conflicts
+
   temporal:
     image: temporalio/auto-setup:1.23
     container_name: temporal-quiz
     environment:
-      DB: postgresql
-      # Use your NeonDB connection details
-      POSTGRES_SEEDS: ${NEON_HOST}
-      DB_PORT: ${NEON_PORT:-5432}
-      POSTGRES_USER: ${NEON_USER}
-      POSTGRES_PWD: ${NEON_PASSWORD}
-      POSTGRES_DB: ${NEON_DATABASE:-temporal}
-      # For NeonDB, you might need SSL
-      POSTGRES_TLS_ENABLED: true
-    # Remove depends_on since we're not using local postgres
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: temporal
+      POSTGRES_PWD: temporal
+      POSTGRES_SEEDS: postgres
+    depends_on:
+      - postgres
     ports:
       - "7234:7233" # Temporal Frontend API - changed port to avoid conflicts
       - "8234:8233" # Temporal Web UI - changed port to avoid conflicts
